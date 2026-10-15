@@ -1,0 +1,72 @@
+name: Build and smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build web UI
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Copy CI gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Build server jar
+        run: ./gradlew :server:shadowJar --stacktrace
+
+      - name: Start server
+        run: |
+          mkdir -p "$RUNNER_TEMP/data"
+          MANGA_READER_DATA="$RUNNER_TEMP/data" MANGA_READER_LOG_LEVEL=DEBUG \
+            nohup java -jar server/build/manga-reader-*.jar > server.log 2>&1 &
+
+      - name: Smoke test
+        run: python3 scripts/smoke_test.py http://127.0.0.1:4567
+
+      - name: Check web UI is served
+        run: |
+          curl -fsS http://127.0.0.1:4567/ | grep -q '<div id="app">'
+          curl -fsS http://127.0.0.1:4567/source/123/manga?url=x | grep -q '<div id="app">'
+
+      - name: Server log
+        if: always()
+        run: tail -n 400 server.log || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manga-reader
+          path: |
+            server/build/manga-reader-*.jar
+            server.log
+          if-no-files-found: ignore

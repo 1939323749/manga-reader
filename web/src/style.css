@@ -1,0 +1,199 @@
+:root {
+  --paper: #ffffff;
+  --ink: #000000;
+  --tone: #e4e4e4;      /* screentone gray: fills, placeholders */
+  --pencil: #7a7a7a;    /* secondary text */
+  --cobalt: #2340c4;    /* the one accent: links, primary actions, focus */
+  --danger: #b3261e;
+
+  --gutter: 10px;       /* white space between panels */
+  --panel-border: 3px;
+
+  --font-title: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  --font-body: system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.125rem;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #000000;
+    --ink: #f2f2f2;
+    --tone: #262626;
+    --pencil: #9a9a9a;
+    --cobalt: #8ea2ff;
+    --danger: #ff8a80;
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--step-3);
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+a {
+  color: var(--cobalt);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 0;
+  font-size: var(--step--1);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn.primary {
+  background: var(--cobalt);
+  border-color: var(--cobalt);
+  color: #fff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.btn.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn.danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+input[type='search'],
+input[type='text'],
+select {
+  font: inherit;
+  padding: 7px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.muted {
+  color: var(--pencil);
+}
+
+.error-box {
+  border: 2px solid var(--danger);
+  color: var(--danger);
+  padding: 10px 14px;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.error-box .btn {
+  margin-left: 10px;
+}
+
+.empty {
+  padding: 48px 0;
+  color: var(--pencil);
+}
+
+.empty p {
+  margin: 0 0 12px;
+}
+
+/* Halftone dots: used for loading placeholders, the app's signature texture */
+.halftone {
+  background-color: var(--tone);
+  background-image: radial-gradient(var(--pencil) 1px, transparent 1.4px);
+  background-size: 6px 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .halftone.loading {
+    animation: tone-drift 1.6s linear infinite;
+  }
+}
+
+@keyframes tone-drift {
+  to {
+    background-position: 6px 6px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
