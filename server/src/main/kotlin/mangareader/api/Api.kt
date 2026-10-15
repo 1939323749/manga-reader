@@ -252,7 +252,11 @@ object Api {
         status: Int,
         e: Throwable,
     ) {
-        if (status < 500) logger.debug { "${method()} ${path()} -> $status: ${e.message}" }
+        if (status < 500) {
+            logger.debug { "${method()} ${path()} -> $status: ${e.message}" }
+        } else {
+            logger.warn(e) { "${method()} ${path()} -> $status" }
+        }
         status(status)
         sendJson(ErrorDto(e.message ?: e.javaClass.simpleName))
     }
