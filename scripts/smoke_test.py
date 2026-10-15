@@ -20,7 +20,9 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:4567").rstrip("/
 # (package, preferApk, source name filter, required)
 TARGETS = [
     ("eu.kanade.tachiyomi.extension.all.mangadex", False, lambda s: s["lang"] == "en", True),
-    ("eu.kanade.tachiyomi.extension.en.mangapill", True, lambda s: True, True),
+    ("eu.kanade.tachiyomi.extension.en.mangapill", False, lambda s: True, True),
+    # APK -> dex2jar path: known to break on R8-optimized APKs (see README), so optional
+    ("eu.kanade.tachiyomi.extension.en.mangapill", True, lambda s: True, False),
     ("eu.kanade.tachiyomi.extension.en.weebcentral", False, lambda s: True, False),
 ]
 

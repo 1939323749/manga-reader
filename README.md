@@ -69,6 +69,7 @@ cd web && npm install && npm run dev
 - 搜索暂不支持扩展自带的筛选器（Filter），也没有扩展偏好设置界面。
 - 需要 WebView 登录或强 Cloudflare 防护的来源，可能要配合 FlareSolverr，部分仍然无法使用。
 - 阅读记录只存在浏览器的 localStorage 里。
+- 安装扩展时优先使用仓库提供的预编译 jar（Keiyoushi 的扩展都有）。只提供 APK 的仓库会走 dex2jar 转换，但 dex2jar 处理不了 R8 的构造函数内联，用 R8 优化过的扩展转换后可能在运行时报 `ClassCastException`，这和上游 Suwayomi 的情况一样。
 
 ## 关于版权
 
