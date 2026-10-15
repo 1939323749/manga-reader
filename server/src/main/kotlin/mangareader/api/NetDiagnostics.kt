@@ -12,10 +12,8 @@ import uy.kohesive.injekt.injectLazy
 import java.net.Proxy
 import java.net.ProxySelector
 import java.net.URI
-import java.security.KeyStore
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 /**
@@ -43,11 +41,7 @@ object NetDiagnostics {
         val attempts: List<Attempt>,
     )
 
-    private val conscryptTrust: X509TrustManager by lazy {
-        val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-        tmf.init(null as KeyStore?)
-        tmf.trustManagers.filterIsInstance<X509TrustManager>().first()
-    }
+    private val conscryptTrust: X509TrustManager by lazy { Conscrypt.getDefaultX509TrustManager() }
 
     /** OkHttp client using Conscrypt (BoringSSL), i.e. the same TLS stack as Mihon on Android */
     fun conscryptBuilder(base: OkHttpClient.Builder): OkHttpClient.Builder {
@@ -57,7 +51,8 @@ object NetDiagnostics {
     }
 
     fun run(url: String): Report {
-        val bare =
+        // a fresh builder each time: OkHttpClient.Builder is mutable
+        fun bare() =
             OkHttpClient
                 .Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
@@ -68,17 +63,17 @@ object NetDiagnostics {
         val variants: List<Pair<String, () -> OkHttpClient>> =
             listOf(
                 "app client (JDK TLS)" to { network.client.newBuilder().callTimeout(30, TimeUnit.SECONDS).build() },
-                "JDK TLS, HTTP/1.1" to { bare.protocols(listOf(Protocol.HTTP_1_1)).build() },
+                "JDK TLS, HTTP/1.1" to { bare().protocols(listOf(Protocol.HTTP_1_1)).build() },
                 "JDK TLS 1.2 only" to {
-                    bare
+                    bare()
                         .connectionSpecs(
                             listOf(ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).tlsVersions(TlsVersion.TLS_1_2).build()),
                         ).build()
                 },
-                "Conscrypt TLS" to { conscryptBuilder(OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS)).build() },
-                "JDK TLS, no proxy" to { bare.proxy(Proxy.NO_PROXY).build() },
+                "Conscrypt TLS" to { conscryptBuilder(bare()).build() },
+                "JDK TLS, no proxy" to { bare().proxy(Proxy.NO_PROXY).build() },
                 "Conscrypt TLS, no proxy" to {
-                    conscryptBuilder(OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS))
+                    conscryptBuilder(bare())
                         .proxy(Proxy.NO_PROXY)
                         .build()
                 },
