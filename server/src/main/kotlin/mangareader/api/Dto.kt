@@ -89,7 +89,8 @@ data class ErrorDto(
 
 fun SManga.toDto(): MangaDto =
     MangaDto(
-        url = url,
+        // details parsers usually don't set url (the host app is expected to keep it)
+        url = runCatching { url }.getOrDefault(""),
         // Extensions sometimes leave lateinit fields unset on partial objects
         title = runCatching { title }.getOrDefault(""),
         thumbnailUrl = thumbnail_url,
@@ -118,7 +119,7 @@ fun MangaDto.toSManga(): SManga =
 
 fun SChapter.toDto(): ChapterDto =
     ChapterDto(
-        url = url,
+        url = runCatching { url }.getOrDefault(""),
         name = runCatching { name }.getOrDefault(""),
         chapterNumber = chapter_number,
         scanlator = scanlator,
