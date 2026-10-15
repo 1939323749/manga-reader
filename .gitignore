@@ -25,3 +25,5 @@ scripts/resources/*.so
 # built web UI (produced by `npm run build` in web/)
 server/src/main/resources/web/
 web/node_modules
+scripts/node_modules
+scripts/package*.json
