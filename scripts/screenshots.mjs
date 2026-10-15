@@ -13,7 +13,8 @@ const api = async (path, body) => {
 }
 
 const sources = await api('/api/sources')
-const pill = sources.find((s) => s.name.toLowerCase().includes('mangapill')) || sources[0]
+// the smoke test leaves MangaDex (via jar) installed; Mangapill ends up on the optional APK build
+const pill = sources.find((s) => s.name === 'MangaDex' && s.lang === 'en') || sources[0]
 const popular = await api(`/api/sources/${pill.id}/popular?page=1`)
 const manga = popular.mangas[0]
 const detail = await api(`/api/sources/${pill.id}/manga`, manga)
