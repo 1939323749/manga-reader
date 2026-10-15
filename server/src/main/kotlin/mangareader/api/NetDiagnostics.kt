@@ -12,8 +12,11 @@ import uy.kohesive.injekt.injectLazy
 import java.net.Proxy
 import java.net.ProxySelector
 import java.net.URI
+import java.security.KeyStore
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 /**
@@ -41,7 +44,30 @@ object NetDiagnostics {
         val attempts: List<Attempt>,
     )
 
-    private val conscryptTrust: X509TrustManager by lazy { Conscrypt.getDefaultX509TrustManager() }
+    /**
+     * The JDK's trust manager with Conscrypt's TLS 1.3 auth type ("GENERIC") mapped to the
+     * name the JDK uses for TLS 1.3 ("UNKNOWN"); otherwise every TLS 1.3 handshake fails.
+     */
+    val conscryptTrust: X509TrustManager by lazy {
+        val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        tmf.init(null as KeyStore?)
+        val jdk = tmf.trustManagers.filterIsInstance<X509TrustManager>().first()
+        object : X509TrustManager {
+            private fun map(authType: String?) = if (authType == "GENERIC") "UNKNOWN" else authType
+
+            override fun checkClientTrusted(
+                chain: Array<out X509Certificate>?,
+                authType: String?,
+            ) = jdk.checkClientTrusted(chain, map(authType))
+
+            override fun checkServerTrusted(
+                chain: Array<out X509Certificate>?,
+                authType: String?,
+            ) = jdk.checkServerTrusted(chain, map(authType))
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> = jdk.acceptedIssuers
+        }
+    }
 
     /** OkHttp client using Conscrypt (BoringSSL), i.e. the same TLS stack as Mihon on Android */
     fun conscryptBuilder(base: OkHttpClient.Builder): OkHttpClient.Builder {
