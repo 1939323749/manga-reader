@@ -40,6 +40,12 @@ object AppConfig {
     val flareSolverrSessionTtl: Int = read("FLARESOLVERR_SESSION_TTL", "15").toInt()
     val flareSolverrAsResponseFallback: Boolean = read("FLARESOLVERR_AS_RESPONSE_FALLBACK", "false").toBoolean()
 
+    /**
+     * Outgoing proxy for all source requests, e.g. http://127.0.0.1:7890 or socks5://127.0.0.1:7891.
+     * Empty = use the operating system's proxy settings; "none" = connect directly.
+     */
+    val proxy: String = read("MANGA_READER_PROXY", "")
+
     /** Optional SOCKS proxy for FlareSolverr, e.g. socks5://127.0.0.1:1080 */
     val socksProxyUrl: String? = read("MANGA_READER_SOCKS_PROXY", "").ifBlank { null }
 }

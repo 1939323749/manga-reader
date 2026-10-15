@@ -28,6 +28,7 @@ java -jar manga-reader-0.1.0.jar
 | `MANGA_READER_HOST` | `0.0.0.0` | 监听地址，只想本机访问就设成 `127.0.0.1` |
 | `MANGA_READER_DATA` | `~/.manga-reader` | 数据目录（已安装的扩展、扩展自己的设置） |
 | `MANGA_READER_REPOS` | Keiyoushi 的 `repo.json` | 扩展仓库地址，逗号分隔 |
+| `MANGA_READER_PROXY` | 空（使用系统代理） | 访问漫画站用的代理，如 `http://127.0.0.1:7890`、`socks5://127.0.0.1:7891`；填 `none` 强制直连 |
 | `FLARESOLVERR_ENABLED` | `false` | 遇到 Cloudflare 验证时是否调用 FlareSolverr |
 | `FLARESOLVERR_URL` | `http://localhost:8191` | FlareSolverr 地址 |
 | `MANGA_READER_LOG_LEVEL` | `INFO` | 日志级别 |
