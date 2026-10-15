@@ -204,6 +204,16 @@ object Api {
         }
 
         get("/api/health") { ctx -> ctx.sendJson(mapOf("status" to "ok")) }
+
+        /** Connection diagnostics for one URL; only answers requests from this machine */
+        get("/api/debug/net") { ctx ->
+            val ip = ctx.ip()
+            val local = ip == "127.0.0.1" || ip == "::1" || ip == "0:0:0:0:0:0:0:1" || ip.startsWith("127.")
+            if (!local) throw NoSuchElementException("Not found")
+            val url = ctx.queryParam("url") ?: throw IllegalArgumentException("url is required")
+            if (!url.startsWith("http://") && !url.startsWith("https://")) throw IllegalArgumentException("url must be http(s)")
+            ctx.runAsync { ctx.sendJson(NetDiagnostics.run(url)) }
+        }
     }
 
     fun RoutesConfig.defineErrors() {

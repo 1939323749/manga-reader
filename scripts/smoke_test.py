@@ -133,6 +133,15 @@ def main():
             else:
                 print(f"  (optional, ignored) {e}")
 
+    print("\n== network diagnostics")
+    try:
+        rep = step("debug/net", lambda: call("GET", "/api/debug/net?url=" + urllib.parse.quote("https://api.mangadex.org/ping", safe="")))
+        for a in rep["attempts"]:
+            print(f"       {'ok ' if a['ok'] else 'ERR'} {a['name']}: {a.get('status')} {a.get('tls') or ''} {a.get('error') or ''}")
+        assert any(a["ok"] and a["name"].startswith("Conscrypt") for a in rep["attempts"]), "Conscrypt TLS did not work"
+    except Exception as e:  # noqa: BLE001
+        failures.append(f"debug/net: {e}")
+
     print("\n== uninstall")
     try:
         step("uninstall weebcentral", lambda: call("POST", "/api/extensions/eu.kanade.tachiyomi.extension.en.weebcentral/uninstall"))
