@@ -78,6 +78,8 @@ jobs:
         run: |
           mkdir -p /tmp/ci-logs
           for f in build.log smoke.log server.log; do if [ -f "$f" ]; then cp "$f" /tmp/ci-logs/; fi; done
+          mkdir -p /tmp/ci-logs/extensions
+          cp "$RUNNER_TEMP"/data/extensions/*.jar /tmp/ci-logs/extensions/ 2>/dev/null || true
           echo "run ${{ github.run_id }} commit ${{ github.sha }} status ${{ job.status }}" > /tmp/ci-logs/STATUS
           cd /tmp/ci-logs
           git init -q -b ci-logs
