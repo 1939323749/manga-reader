@@ -127,5 +127,14 @@ fun main() {
         logger.error(throwable) { "unhandled exception" }
     }
     setupAndroid()
-    startServer()
+    try {
+        startServer()
+    } catch (e: io.javalin.util.JavalinBindException) {
+        logger.error {
+            "Port ${AppConfig.port} is already in use (another manga-reader or Suwayomi may be running).\n" +
+                "Start on a different port, e.g.:  java \"-Dmanga.reader.port=8080\" -jar manga-reader.jar\n" +
+                "or set the MANGA_READER_PORT environment variable."
+        }
+        kotlin.system.exitProcess(1)
+    }
 }

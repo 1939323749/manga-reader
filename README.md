@@ -12,6 +12,8 @@
 java -jar manga-reader-0.1.0.jar
 ```
 
+如果提示端口被占用（比如同时开着 Suwayomi），换个端口：`java "-Dmanga.reader.port=8080" -jar manga-reader-0.1.0.jar`。
+
 然后打开 <http://localhost:4567>，先到「扩展」页安装扩展，再到「来源」页浏览。
 
 构建好的 jar 可以在 GitHub Actions 每次构建的 Artifacts 里下载。
