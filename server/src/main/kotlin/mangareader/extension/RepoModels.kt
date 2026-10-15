@@ -3,7 +3,7 @@ package mangareader.extension
 /*
  * Wire formats of Mihon extension repositories.
  * Adapted from Suwayomi-Server (MPL-2.0):
- *   suwayomi/tachidesk/manga/impl/extension/github/*
+ *   suwayomi/tachidesk/manga/impl/extension/github/ (package)
  */
 
 import kotlinx.serialization.SerialName
