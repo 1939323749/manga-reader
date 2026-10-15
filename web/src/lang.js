@@ -1,46 +1,38 @@
 // Display names for the language codes extensions use
-const names = {
+const special = {
   all: '多语言',
   other: '其他',
-  zh: '中文',
+  multi: '多语言',
   'zh-Hans': '简体中文',
   'zh-Hant': '繁體中文',
-  en: '英语',
-  ja: '日语',
-  ko: '韩语',
-  es: '西班牙语',
   'es-419': '西班牙语（拉美）',
-  fr: '法语',
-  de: '德语',
-  it: '意大利语',
-  pt: '葡萄牙语',
   'pt-BR': '葡萄牙语（巴西）',
-  ru: '俄语',
-  uk: '乌克兰语',
-  pl: '波兰语',
-  tr: '土耳其语',
-  ar: '阿拉伯语',
-  id: '印尼语',
-  vi: '越南语',
-  th: '泰语',
-  ms: '马来语',
-  fil: '菲律宾语',
-  hi: '印地语',
-  bn: '孟加拉语',
-  fa: '波斯语',
-  he: '希伯来语',
-  ro: '罗马尼亚语',
-  hu: '匈牙利语',
-  cs: '捷克语',
-  nl: '荷兰语',
-  sv: '瑞典语',
-  el: '希腊语',
-  bg: '保加利亚语',
-  ca: '加泰罗尼亚语',
-  mn: '蒙古语',
-  my: '缅甸语',
+}
+
+let display = null
+try {
+  display = new Intl.DisplayNames(['zh-CN'], { type: 'language' })
+} catch {
+  display = null
 }
 
 export function langName(code) {
-  return names[code] || code
+  if (special[code]) return special[code]
+  try {
+    const name = display?.of(code)
+    if (name && name !== code) return name
+  } catch {
+    // invalid tag
+  }
+  return code
+}
+
+// Puts the reader's own languages first, then the rest alphabetically by name
+const preferred = ['zh', 'zh-Hans', 'zh-Hant', 'en', 'ja', 'ko', 'all']
+
+export function compareLang(a, b) {
+  const ia = preferred.indexOf(a)
+  const ib = preferred.indexOf(b)
+  if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+  return langName(a).localeCompare(langName(b), 'zh-CN')
 }

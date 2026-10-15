@@ -31,7 +31,7 @@ function remember(m) {
             @error="(e) => (e.target.style.visibility = 'hidden')"
           />
         </div>
-        <span class="title">{{ m.title || '未命名' }}</span>
+        <span class="title"><span class="title-text">{{ m.title || '未命名' }}</span></span>
       </RouterLink>
     </li>
   </ul>
@@ -93,11 +93,14 @@ function remember(m) {
   padding: 6px 8px 8px;
   font-size: var(--step--1);
   line-height: 1.4;
+  flex: 1;
+}
+
+.title-text {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
 }
 
 @media (max-width: 480px) {

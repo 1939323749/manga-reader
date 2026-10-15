@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { api } from '../api.js'
-import { langName } from '../lang.js'
+import { compareLang, langName } from '../lang.js'
 
 const all = ref([])
 const loading = ref(true)
@@ -30,7 +30,7 @@ async function load(refresh = false) {
 
 onMounted(() => load())
 
-const langs = computed(() => [...new Set(all.value.map((e) => e.lang))].sort())
+const langs = computed(() => [...new Set(all.value.map((e) => e.lang))].sort(compareLang))
 
 const visible = computed(() => {
   const q = query.value.trim().toLowerCase()
@@ -149,6 +149,7 @@ const busyLabel = { install: '安装中…', update: '更新中…', uninstall: 
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+  max-width: 820px;
 }
 
 .filters {
@@ -181,6 +182,7 @@ const busyLabel = { install: '安装中…', update: '更新中…', uninstall: 
 }
 
 .block h2 {
+  max-width: 820px;
   font-size: var(--step-1);
   padding-bottom: 6px;
   border-bottom: var(--panel-border) solid var(--ink);

@@ -300,16 +300,16 @@ function formatDate(ms) {
 
 @media (max-width: 600px) {
   .manga {
-    grid-template-columns: 120px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
+  }
+
+  .cover-panel {
+    width: 150px;
   }
 
   .meta h1 {
     font-size: var(--step-2);
-  }
-
-  .desc {
-    grid-column: 1 / -1;
   }
 
   .chapter {

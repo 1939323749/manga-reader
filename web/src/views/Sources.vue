@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { api } from '../api.js'
-import { langName } from '../lang.js'
+import { compareLang, langName } from '../lang.js'
 
 const sources = ref([])
 const loading = ref(true)
@@ -22,18 +22,29 @@ async function load() {
 
 onMounted(load)
 
-const groups = computed(() => {
+// One block per extension. Multi-language extensions (e.g. MangaDex) list their
+// languages compactly instead of repeating the same name dozens of times.
+const extensions = computed(() => {
   const q = filter.value.trim().toLowerCase()
   const map = new Map()
   for (const s of sources.value) {
-    if (q && !s.name.toLowerCase().includes(q)) continue
-    if (!map.has(s.lang)) map.set(s.lang, [])
-    map.get(s.lang).push(s)
+    if (q && !s.name.toLowerCase().includes(q) && !s.extensionName.toLowerCase().includes(q)) continue
+    if (!map.has(s.pkgName)) map.set(s.pkgName, { pkgName: s.pkgName, name: s.extensionName, iconUrl: s.iconUrl, sources: [] })
+    map.get(s.pkgName).sources.push(s)
   }
-  return [...map.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([lang, list]) => ({ lang, list: list.sort((a, b) => a.name.localeCompare(b.name)) }))
+  for (const ext of map.values()) {
+    ext.sources.sort((a, b) => compareLang(a.lang, b.lang) || a.name.localeCompare(b.name))
+    // Several sources in one language (a "factory" extension with mirrors) need their own names
+    const names = new Set(ext.sources.map((s) => s.name))
+    ext.namedSources = names.size > 1
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name))
 })
+
+function label(ext, s) {
+  if (ext.sources.length === 1) return null
+  return ext.namedSources ? `${s.name}（${langName(s.lang)}）` : langName(s.lang)
+}
 </script>
 
 <template>
@@ -61,20 +72,38 @@ const groups = computed(() => {
   </div>
 
   <template v-else>
-    <section v-for="g in groups" :key="g.lang" class="group">
-      <h2 class="lang">{{ langName(g.lang) }}</h2>
-      <ul class="list">
-        <li v-for="s in g.list" :key="s.id">
-          <RouterLink :to="{ name: 'browse', params: { sourceId: s.id } }" class="row">
-            <img v-if="s.iconUrl" :src="s.iconUrl" alt="" class="icon" loading="lazy" />
+    <ul class="list">
+      <li v-for="ext in extensions" :key="ext.pkgName" class="ext">
+        <!-- single-source extension: the whole row is the link -->
+        <RouterLink
+          v-if="ext.sources.length === 1"
+          :to="{ name: 'browse', params: { sourceId: ext.sources[0].id } }"
+          class="row link"
+        >
+          <img v-if="ext.iconUrl" :src="ext.iconUrl" alt="" class="icon" loading="lazy" />
+          <span v-else class="icon halftone"></span>
+          <span class="name">{{ ext.sources[0].name }}</span>
+          <span class="lang muted">{{ langName(ext.sources[0].lang) }}</span>
+        </RouterLink>
+
+        <template v-else>
+          <div class="row">
+            <img v-if="ext.iconUrl" :src="ext.iconUrl" alt="" class="icon" loading="lazy" />
             <span v-else class="icon halftone"></span>
-            <span class="name">{{ s.name }}</span>
-            <span v-if="s.name !== s.extensionName" class="ext muted">{{ s.extensionName }}</span>
-          </RouterLink>
-        </li>
-      </ul>
-    </section>
-    <p v-if="!groups.length" class="empty">没有名字包含“{{ filter }}”的来源。</p>
+            <span class="name">{{ ext.name }}</span>
+            <span class="lang muted">{{ ext.sources.length }} 个来源</span>
+          </div>
+          <ul class="variants">
+            <li v-for="s in ext.sources" :key="s.id">
+              <RouterLink :to="{ name: 'browse', params: { sourceId: s.id } }" class="variant">
+                {{ label(ext, s) }}
+              </RouterLink>
+            </li>
+          </ul>
+        </template>
+      </li>
+    </ul>
+    <p v-if="!extensions.length" class="empty">没有名字包含“{{ filter }}”的来源。</p>
   </template>
 </template>
 
@@ -85,41 +114,38 @@ const groups = computed(() => {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  max-width: 820px;
 }
 
 .placeholder {
   height: 160px;
+  max-width: 820px;
   border: var(--panel-border) solid var(--ink);
-}
-
-.group + .group {
-  margin-top: 28px;
-}
-
-.lang {
-  font-size: var(--step-1);
-  padding-bottom: 6px;
-  border-bottom: var(--panel-border) solid var(--ink);
 }
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-width: 720px;
+  max-width: 820px;
+  border-top: var(--panel-border) solid var(--ink);
+}
+
+.ext {
+  border-bottom: 1px solid var(--tone);
+  padding: 4px 0;
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 4px;
+  padding: 8px 4px;
   color: var(--ink);
-  border-bottom: 1px solid var(--tone);
 }
 
-.row:hover {
+.row.link:hover {
   text-decoration: none;
   background: var(--tone);
 }
@@ -136,8 +162,37 @@ const groups = computed(() => {
   font-weight: 600;
 }
 
-.ext {
+.lang {
   margin-left: auto;
   font-size: var(--step--1);
+}
+
+.variants {
+  list-style: none;
+  margin: 0 0 8px 48px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.variant {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 1px 10px;
+  font-size: var(--step--1);
+}
+
+.variant:hover {
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .variants {
+    margin-left: 0;
+  }
 }
 </style>
