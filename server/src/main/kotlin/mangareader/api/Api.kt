@@ -3,8 +3,7 @@ package mangareader.api
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -110,6 +109,7 @@ object Api {
                         nsfw = ext?.nsfw ?: false,
                         iconUrl = ext?.iconUrl,
                         supportsLatest = source.supportsLatest,
+                        configurable = source is ConfigurableSource,
                     ),
                 )
             }
@@ -134,8 +134,40 @@ object Api {
             ctx.runAsync {
                 val source = SourceManager.get(ctx.sourceId())
                 val query = ctx.queryParam("q").orEmpty()
-                val filters: FilterList = runCatching { source.getFilterList() }.getOrDefault(FilterList())
-                ctx.sendJson(source.getSearchManga(ctx.pageParam(), query, filters).toDto())
+                ctx.sendJson(source.getSearchManga(ctx.pageParam(), query, SourceSettings.filterList(source)).toDto())
+            }
+        }
+
+        /** body: SearchRequestDto -> search with filter changes applied to a fresh filter list */
+        post("/api/sources/{sourceId}/search") { ctx ->
+            ctx.runAsync {
+                val source = SourceManager.get(ctx.sourceId())
+                val req = ctx.bodyAs<SearchRequestDto>()
+                val filters = SourceSettings.filterList(source)
+                SourceSettings.applyFilters(filters, req.filters)
+                ctx.sendJson(source.getSearchManga(req.page.coerceAtLeast(1), req.q, filters).toDto())
+            }
+        }
+
+        get("/api/sources/{sourceId}/filters") { ctx ->
+            ctx.runAsync {
+                ctx.sendJson(SourceSettings.filters(SourceManager.get(ctx.sourceId())))
+            }
+        }
+
+        get("/api/sources/{sourceId}/preferences") { ctx ->
+            ctx.runAsync {
+                ctx.sendJson(SourceSettings.preferences(SourceManager.get(ctx.sourceId())))
+            }
+        }
+
+        /** body: PreferenceChangeDto. The extension is reloaded so values read at construction (e.g. baseUrl) apply. */
+        put("/api/sources/{sourceId}/preferences") { ctx ->
+            ctx.runAsync {
+                val id = ctx.sourceId()
+                SourceSettings.setPreference(SourceManager.get(id), ctx.bodyAs<PreferenceChangeDto>())
+                SourceManager.invalidateSource(id)
+                ctx.sendJson(SourceSettings.preferences(SourceManager.get(id)))
             }
         }
 

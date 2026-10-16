@@ -5,7 +5,8 @@ Usage: smoke_test.py [base_url]
 
 Installs a couple of extensions (one from the prebuilt jar, one through the
 APK -> dex2jar path), then walks popular list -> manga -> chapter -> page image
-for each. Exits non-zero if any required check fails.
+for each, and checks search filters and source preferences on MangaDex.
+Exits non-zero if any required check fails.
 """
 
 import json
@@ -67,6 +68,93 @@ def wait_for_server():
     raise RuntimeError("server did not come up")
 
 
+def expect_status(method, path, body, status):
+    try:
+        call(method, path, body)
+    except RuntimeError as e:
+        assert f"HTTP {status}" in str(e), str(e)
+        return
+    raise AssertionError(f"{method} {path} should have failed with {status}")
+
+
+def walk_filters(filters):
+    """Yield (filter, index, childIndex) for every filter, including group children."""
+    for f in filters:
+        yield f, f["index"], None
+        for c in f.get("filters") or []:
+            yield c, f["index"], c["index"]
+
+
+def exercise_filters(sid):
+    filters = step("filter list", lambda: call("GET", f"/api/sources/{sid}/filters"))
+    kinds = sorted({f["type"] for f, _, _ in walk_filters(filters)})
+    print(f"       -> {len(filters)} filters, types: {', '.join(kinds)}")
+    assert filters, "no filters"
+    assert [f["index"] for f in filters] == list(range(len(filters))), "indices are not positions"
+    assert "unknown" not in kinds, "unrecognised filter type"
+
+    base = step("search with default filters", lambda: call(
+        "POST", f"/api/sources/{sid}/search", {"q": "", "page": 1, "filters": []}))
+    assert base["mangas"], "default filtered search is empty"
+
+    # include the first tag of a group of tri-states (MangaDex: tags/genres)
+    tri = next(((f, i, c) for f, i, c in walk_filters(filters) if f["type"] == "tristate" and c is not None), None)
+    assert tri, "no tri-state filter inside a group"
+    f, i, c = tri
+    change = [{"index": i, "childIndex": c, "state": 1}]
+    tagged = step(f"search including '{f['name']}'", lambda: call(
+        "POST", f"/api/sources/{sid}/search", {"q": "", "page": 1, "filters": change}))
+    print(f"       -> {len(tagged['mangas'])} results")
+    assert tagged["mangas"], "filtered search is empty"
+    before = {m["url"] for m in base["mangas"]}
+    after = {m["url"] for m in tagged["mangas"]}
+    assert before != after, "filter had no effect on results"
+
+    sort = next((f for f in filters if f["type"] == "sort"), None)
+    if sort:
+        step(f"search sorted by '{sort['values'][-1]}'", lambda: call(
+            "POST", f"/api/sources/{sid}/search",
+            {"q": "", "page": 1, "filters": [{"index": sort["index"], "state": {"index": len(sort["values"]) - 1, "ascending": True}}]}))
+
+    step("bad filter index -> 400", lambda: expect_status(
+        "POST", f"/api/sources/{sid}/search", {"q": "", "filters": [{"index": 9999, "state": 1}]}, 400))
+
+
+def exercise_preferences(sid):
+    url = f"/api/sources/{sid}/preferences"
+    prefs = step("preferences", lambda: call("GET", url))
+    assert prefs["configurable"], "source should be configurable"
+    items = prefs["preferences"]
+    print(f"       -> {len(items)} settings: {', '.join(sorted({p['type'] for p in items}))}")
+    assert items, "no preferences"
+
+    def value_of(resp, key):
+        return next(p["value"] for p in resp["preferences"] if p["key"] == key)
+
+    switch = next((p for p in items if p["type"] in ("switch", "checkbox") and p["key"]), None)
+    assert switch, "no switch preference"
+    old = bool(switch["value"])
+    after = step(f"toggle '{switch['title']}'", lambda: call("PUT", url, {"key": switch["key"], "value": not old}))
+    assert value_of(after, switch["key"]) is (not old), "switch value did not change"
+    assert value_of(call("GET", url), switch["key"]) is (not old), "switch value not persisted"
+    call("PUT", url, {"key": switch["key"], "value": old})
+
+    lst = next((p for p in items if p["type"] == "list" and p["key"] and len(p["entryValues"] or []) > 1), None)
+    if lst:
+        cur = lst["value"]
+        other = next(v for v in lst["entryValues"] if v != cur)
+        after = step(f"set '{lst['title']}' = {other}", lambda: call("PUT", url, {"key": lst["key"], "value": other}))
+        assert value_of(after, lst["key"]) == other, "list value did not change"
+        step("invalid list value -> 400", lambda: expect_status(
+            "PUT", url, {"key": lst["key"], "value": "definitely-not-an-option"}, 400))
+        call("PUT", url, {"key": lst["key"], "value": cur})
+
+    step("unknown key -> 404", lambda: expect_status("PUT", url, {"key": "no-such-key", "value": "x"}, 404))
+    # the extension was reloaded after each change; it must still work
+    again = step("popular after reload", lambda: call("GET", f"/api/sources/{sid}/popular?page=1"))
+    assert again["mangas"], "popular list empty after preference change"
+
+
 def exercise(pkg, prefer_apk, pick_source):
     q = "?preferApk=1" if prefer_apk else ""
     ext = step(f"install {pkg}{' (apk/dex2jar)' if prefer_apk else ''}",
@@ -86,6 +174,10 @@ def exercise(pkg, prefer_apk, pick_source):
 
     search = step("search 'one'", lambda: call("GET", f"/api/sources/{sid}/search?q=one&page=1"))
     print(f"       -> {len(search['mangas'])} results")
+
+    if pkg.endswith(".mangadex") and not prefer_apk:
+        exercise_filters(sid)
+        exercise_preferences(sid)
 
     for manga in popular["mangas"][:3]:
         detail = step(f"details '{manga['title'][:40]}'",

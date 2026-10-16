@@ -59,7 +59,11 @@ cd web && npm install && npm run dev
 | GET | `/api/sources/{id}` | 来源信息（会加载扩展） |
 | GET | `/api/sources/{id}/popular?page=` | 热门 |
 | GET | `/api/sources/{id}/latest?page=` | 最新 |
-| GET | `/api/sources/{id}/search?q=&page=` | 搜索 |
+| GET | `/api/sources/{id}/search?q=&page=` | 搜索（默认筛选器） |
+| POST | `/api/sources/{id}/search` | 带筛选器搜索，请求体 `{"q", "page", "filters": [{"index", "childIndex"?, "state"}]}` |
+| GET | `/api/sources/{id}/filters` | 来源的筛选器列表（`index` 为位置，分组的子项在 `filters` 里） |
+| GET | `/api/sources/{id}/preferences` | 来源的偏好设置 |
+| PUT | `/api/sources/{id}/preferences` | 修改一项设置，请求体 `{"key", "value"}`；之后扩展会重新加载 |
 | POST | `/api/sources/{id}/manga` | 请求体为漫画对象，返回详情和章节列表 |
 | POST | `/api/sources/{id}/pages` | 请求体为章节对象，返回页面列表 |
 | GET | `/api/sources/{id}/image?url=&imageUrl=` | 页面图片 |
@@ -69,7 +73,7 @@ cd web && npm install && npm run dev
 
 ## 已知限制
 
-- 搜索暂不支持扩展自带的筛选器（Filter），也没有扩展偏好设置界面。
+- 筛选器的 `state` 只改动和默认值不同的项；少数来源的筛选器要等它先加载过一次列表才完整，这时在筛选面板里点「重新载入」。
 - 需要 WebView 登录或强 Cloudflare 防护的来源，可能要配合 FlareSolverr，部分仍然无法使用。
 - 阅读记录只存在浏览器的 localStorage 里。
 - 安装扩展时优先使用仓库提供的预编译 jar（Keiyoushi 的扩展都有）。只提供 APK 的仓库会走 dex2jar 转换，但 dex2jar 处理不了 R8 的构造函数内联，用 R8 优化过的扩展转换后可能在运行时报 `ClassCastException`，这和上游 Suwayomi 的情况一样。
