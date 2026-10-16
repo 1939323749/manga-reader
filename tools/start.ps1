@@ -39,26 +39,26 @@ try {
 $ok = $false
 Write-Host 'Downloading the latest build (~145 MB)...'
 
-# 1) BITS: resumable, follows redirects, uses the system proxy
+# 1) Invoke-WebRequest with the system proxy
 try {
     Remove-Item -Force $tmp -ErrorAction SilentlyContinue
-    Start-BitsTransfer -Source $url -Destination $tmp -ErrorAction Stop
+    $proxy = [Net.WebRequest]::GetSystemWebProxy().GetProxy([Uri]$url)
+    if ($proxy.AbsoluteUri -ne $url) {
+        Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp -Proxy $proxy.AbsoluteUri
+    } else {
+        Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp
+    }
     $ok = Test-Jar $tmp $expected
-} catch { Write-Host "  BITS download failed: $($_.Exception.Message)" }
+} catch { Write-Host "  Invoke-WebRequest failed: $($_.Exception.Message)" }
 
-# 2) Invoke-WebRequest with the system proxy
+# 2) BITS: resumable and follows redirects, but often much slower
 if (-not $ok) {
-    Write-Host 'Retrying with Invoke-WebRequest...'
+    Write-Host 'Retrying with BITS...'
     try {
         Remove-Item -Force $tmp -ErrorAction SilentlyContinue
-        $proxy = [Net.WebRequest]::GetSystemWebProxy().GetProxy([Uri]$url)
-        if ($proxy.AbsoluteUri -ne $url) {
-            Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp -Proxy $proxy.AbsoluteUri
-        } else {
-            Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp
-        }
+        Start-BitsTransfer -Source $url -Destination $tmp -ErrorAction Stop
         $ok = Test-Jar $tmp $expected
-    } catch { Write-Host "  Invoke-WebRequest failed: $($_.Exception.Message)" }
+    } catch { Write-Host "  BITS download failed: $($_.Exception.Message)" }
 }
 
 if ($ok) {
