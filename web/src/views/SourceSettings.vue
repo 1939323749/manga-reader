@@ -110,7 +110,9 @@ onMounted(load)
       <label v-else-if="p.type === 'list'" class="row">
         <span class="text">
           <span class="title">{{ p.title }}</span>
-          <span v-if="p.summary && !p.summary.includes('%s')" class="summary muted">{{ p.summary }}</span>
+          <!-- Android fills "%s" with the selected entry -->
+          <span v-if="p.summary?.includes('%s')" class="summary muted">{{ p.summary.replaceAll('%s', entryLabel(p) ?? '未设置') }}</span>
+          <span v-else-if="p.summary" class="summary muted">{{ p.summary }}</span>
           <span v-else class="summary muted">当前：{{ entryLabel(p) ?? '未设置' }}</span>
         </span>
         <select :value="p.value" :disabled="!p.enabled || saving === p.key" @change="save(p, $event.target.value)">
