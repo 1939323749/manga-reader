@@ -45,6 +45,16 @@ object SourceManager {
         byPackage.clear()
     }
 
+    /** Drop the cached instances of one extension (all of its sources), e.g. after a setting changed. */
+    fun invalidate(pkgName: String) {
+        byPackage.remove(pkgName)?.forEach { sources.remove(it) }
+    }
+
+    fun invalidateSource(sourceId: Long) {
+        val pkg = byPackage.entries.firstOrNull { sourceId in it.value }?.key
+        if (pkg != null) invalidate(pkg) else sources.remove(sourceId)
+    }
+
     suspend fun get(sourceId: Long): CatalogueSource {
         val cached = sources[sourceId]
         if (cached != null) return cached as? CatalogueSource ?: throw NotCatalogueSource(sourceId)

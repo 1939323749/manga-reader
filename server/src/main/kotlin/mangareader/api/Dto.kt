@@ -5,6 +5,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 
 /*
@@ -140,3 +142,63 @@ fun ChapterDto.toSChapter(): SChapter =
 fun MangasPage.toDto(): MangasPageDto = MangasPageDto(mangas.map { it.toDto() }, hasNextPage)
 
 fun Page.toDto(): PageDto = PageDto(index, url, imageUrl)
+
+/**
+ * One entry of a source's filter list. `type` is one of header, separator, text, checkbox,
+ * tristate, select, sort, group, unknown. `state` depends on the type: string (text),
+ * boolean (checkbox), 0/1/2 = ignore/include/exclude (tristate), option index (select),
+ * {index, ascending} or null (sort). Groups carry their children in `filters`.
+ */
+@Serializable
+data class FilterDto(
+    val index: Int,
+    val type: String,
+    val name: String,
+    val state: JsonElement = JsonNull,
+    val values: List<String>? = null,
+    val filters: List<FilterDto>? = null,
+)
+
+/** New state for the filter at `index` (or for child `childIndex` of the group at `index`). */
+@Serializable
+data class FilterChangeDto(
+    val index: Int,
+    val childIndex: Int? = null,
+    val state: JsonElement = JsonNull,
+)
+
+@Serializable
+data class SearchRequestDto(
+    val q: String = "",
+    val page: Int = 1,
+    val filters: List<FilterChangeDto> = emptyList(),
+)
+
+/** `type`: list, multiselect, text, switch, checkbox, other (shown read-only). */
+@Serializable
+data class PreferenceDto(
+    val key: String?,
+    val type: String,
+    val title: String?,
+    val summary: String?,
+    val enabled: Boolean,
+    val visible: Boolean,
+    val entries: List<String>?,
+    val entryValues: List<String>?,
+    val dialogTitle: String?,
+    val dialogMessage: String?,
+    val value: JsonElement,
+    val defaultValue: JsonElement,
+)
+
+@Serializable
+data class SourcePreferencesDto(
+    val configurable: Boolean,
+    val preferences: List<PreferenceDto>,
+)
+
+@Serializable
+data class PreferenceChangeDto(
+    val key: String,
+    val value: JsonElement = JsonNull,
+)
