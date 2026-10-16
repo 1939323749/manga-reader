@@ -151,6 +151,7 @@ fun setupProxy() {
 
         else -> {
             System.setProperty("java.net.useSystemProxies", "true")
+            ProxySelector.getDefault()?.let { ProxySelector.setDefault(SystemProxySelector(it)) }
             val probe = runCatching { ProxySelector.getDefault().select(URI("https://www.example.com/")) }.getOrNull()
             val active = probe?.firstOrNull { it.type() != Proxy.Type.DIRECT }
             logger.info {
@@ -164,15 +165,47 @@ fun setupProxy() {
     }
 }
 
+/** Requests to this machine never go through a proxy */
+private fun isLocalHost(host: String?): Boolean {
+    val h = host?.lowercase()?.removeSurrounding("[", "]") ?: return true
+    return h == "localhost" || h.startsWith("127.") || h == "::1" || h == "0:0:0:0:0:0:0:1"
+}
+
+/**
+ * The OS proxy settings, applied to http(s) requests only. With java.net.useSystemProxies the JDK
+ * also answers the socket:// lookup every plain java.net.Socket makes, and a bare "host:port"
+ * system proxy (what Clash and v2rayN set) comes back as SOCKS there. OkHttp's socket *to* the
+ * HTTP proxy then went through the proxy again, a loop Clash cuts for every site it routes DIRECT:
+ * most Chinese sources failed with "Remote host terminated the handshake".
+ */
+private class SystemProxySelector(
+    private val system: ProxySelector,
+) : ProxySelector() {
+    override fun select(uri: URI?): List<Proxy> {
+        if (uri == null || uri.scheme.equals("socket", ignoreCase = true) || isLocalHost(uri.host)) {
+            return listOf(Proxy.NO_PROXY)
+        }
+        val proxies = system.select(uri)
+        if (proxies.any { it.type() != Proxy.Type.DIRECT }) return proxies
+        // A SOCKS-only system proxy is only reported for socket:// lookups; hand it to OkHttp instead
+        val socks = system.select(URI("socket", null, uri.host, uri.port, null, null, null))
+        return socks.filter { it.type() == Proxy.Type.SOCKS }.ifEmpty { proxies }
+    }
+
+    override fun connectFailed(
+        uri: URI?,
+        sa: SocketAddress?,
+        ioe: java.io.IOException?,
+    ) {
+        logger.warn { "proxy connection failed for $uri: ${ioe?.message}" }
+    }
+}
+
 private class FixedProxySelector(
     private val proxy: Proxy,
 ) : ProxySelector() {
     override fun select(uri: URI?): List<Proxy> {
-        val host = uri?.host?.lowercase()
-        // never proxy requests to this machine
-        if (host == null || host == "localhost" || host == "127.0.0.1" || host == "::1" || host == "[::1]") {
-            return listOf(Proxy.NO_PROXY)
-        }
+        if (isLocalHost(uri?.host)) return listOf(Proxy.NO_PROXY)
         return listOf(proxy)
     }
 
