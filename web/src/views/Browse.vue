@@ -1,13 +1,10 @@
-<script>
-// Lists survive navigating to a manga and back (keyed by source + mode + query)
-const listCache = new Map()
-</script>
-
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../api.js'
+import FilterPanel from '../components/FilterPanel.vue'
 import MangaGrid from '../components/MangaGrid.vue'
+import { listCache } from '../store.js'
 
 const props = defineProps({ sourceId: { type: String, required: true } })
 const route = useRoute()
@@ -16,9 +13,22 @@ const router = useRouter()
 const source = ref(null)
 const sourceError = ref('')
 
-const mode = computed(() => (route.query.q ? 'search' : route.query.tab === 'latest' ? 'latest' : 'popular'))
+// Applied filters live in the URL (?f=) as changes against the defaults, so back/forward works
+const filterParam = computed(() => String(route.query.f || ''))
+const appliedFilters = computed(() => {
+  try {
+    const f = JSON.parse(filterParam.value || '[]')
+    return Array.isArray(f) ? f : []
+  } catch {
+    return []
+  }
+})
+const mode = computed(() =>
+  route.query.q || appliedFilters.value.length ? 'search' : route.query.tab === 'latest' ? 'latest' : 'popular',
+)
 const query = computed(() => String(route.query.q || ''))
 const searchInput = ref(query.value)
+const showFilters = ref(false)
 
 const mangas = ref([])
 const page = ref(0)
@@ -26,7 +36,7 @@ const hasNext = ref(true)
 const loading = ref(false)
 const error = ref('')
 
-const cacheKey = computed(() => `${props.sourceId}|${mode.value}|${query.value}`)
+const cacheKey = computed(() => `${props.sourceId}|${mode.value}|${query.value}|${filterParam.value}`)
 
 async function loadSource() {
   sourceError.value = ''
@@ -63,7 +73,9 @@ async function loadMore() {
   try {
     const res =
       mode.value === 'search'
-        ? await api.search(props.sourceId, query.value, next)
+        ? appliedFilters.value.length
+          ? await api.searchFiltered(props.sourceId, query.value, next, appliedFilters.value)
+          : await api.search(props.sourceId, query.value, next)
         : mode.value === 'latest'
           ? await api.latest(props.sourceId, next)
           : await api.popular(props.sourceId, next)
@@ -87,9 +99,17 @@ function setTab(tab) {
   searchInput.value = ''
 }
 
+function searchQuery(q, f) {
+  return { ...(q ? { q } : {}), ...(f ? { f } : {}) }
+}
+
 function submitSearch() {
-  const q = searchInput.value.trim()
-  router.replace({ query: q ? { q } : {} })
+  router.replace({ query: searchQuery(searchInput.value.trim(), filterParam.value) })
+}
+
+function applyFilters(changes) {
+  showFilters.value = false
+  router.replace({ query: searchQuery(query.value, changes.length ? JSON.stringify(changes) : '') })
 }
 
 // Infinite scroll: load the next page when the sentinel comes into view
@@ -122,7 +142,16 @@ watch(query, (q) => (searchInput.value = q))
 <template>
   <header class="head">
     <RouterLink to="/" class="back">返回来源</RouterLink>
-    <h1>{{ source?.name || '…' }}</h1>
+    <div class="title-row">
+      <h1>{{ source?.name || '…' }}</h1>
+      <RouterLink
+        v-if="source?.configurable"
+        :to="{ name: 'source-settings', params: { sourceId } }"
+        class="btn"
+      >
+        来源设置
+      </RouterLink>
+    </div>
   </header>
 
   <div v-if="sourceError" class="error-box">无法加载这个来源：{{ sourceError }}</div>
@@ -152,10 +181,28 @@ watch(query, (q) => (searchInput.value = q))
     <form class="search" role="search" @submit.prevent="submitSearch">
       <input v-model="searchInput" type="search" placeholder="在这个来源中搜索" aria-label="搜索漫画" />
       <button class="btn" type="submit">搜索</button>
+      <button
+        class="btn"
+        :class="{ primary: appliedFilters.length }"
+        type="button"
+        :aria-expanded="showFilters"
+        @click="showFilters = !showFilters"
+      >
+        筛选{{ appliedFilters.length ? `（${appliedFilters.length}）` : '' }}
+      </button>
     </form>
   </div>
 
-  <p v-if="mode === 'search'" class="muted result-line">“{{ query }}”的搜索结果</p>
+  <FilterPanel v-if="showFilters" :source-id="sourceId" :applied="appliedFilters" @apply="applyFilters" />
+
+  <p v-if="mode === 'search'" class="muted result-line">
+    <template v-if="query">“{{ query }}”的搜索结果</template>
+    <template v-else>筛选结果</template>
+    <template v-if="appliedFilters.length">
+      · 已应用 {{ appliedFilters.length }} 项筛选
+      <button class="link" type="button" @click="applyFilters([])">清除</button>
+    </template>
+  </p>
 
   <MangaGrid v-if="mangas.length" :source-id="sourceId" :mangas="mangas" />
 
@@ -178,6 +225,22 @@ watch(query, (q) => (searchInput.value = q))
 <style scoped>
 .head {
   margin-bottom: 18px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.link {
+  border: 0;
+  background: none;
+  color: var(--cobalt);
+  padding: 0;
+  font-size: inherit;
 }
 
 .back {
@@ -217,8 +280,8 @@ watch(query, (q) => (searchInput.value = q))
 .search {
   display: flex;
   gap: 8px;
-  flex: 1 1 260px;
-  max-width: 420px;
+  flex: 1 1 320px;
+  max-width: 500px;
 }
 
 .search input {

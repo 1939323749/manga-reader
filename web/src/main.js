@@ -7,6 +7,7 @@ import Recent from './views/Recent.vue'
 import Browse from './views/Browse.vue'
 import Manga from './views/Manga.vue'
 import Reader from './views/Reader.vue'
+import SourceSettings from './views/SourceSettings.vue'
 import './style.css'
 
 const router = createRouter({
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: '/extensions', name: 'extensions', component: Extensions, meta: { title: '扩展' } },
     { path: '/recent', name: 'recent', component: Recent, meta: { title: '最近阅读' } },
     { path: '/source/:sourceId', name: 'browse', component: Browse, props: true },
+    { path: '/source/:sourceId/settings', name: 'source-settings', component: SourceSettings, props: true, meta: { title: '来源设置' } },
     { path: '/source/:sourceId/manga', name: 'manga', component: Manga, props: (r) => ({ sourceId: r.params.sourceId, url: r.query.url }) },
     {
       path: '/source/:sourceId/read',

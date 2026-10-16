@@ -77,3 +77,10 @@ export function lastReadChapter(sourceId, mangaUrl) {
 export function clearHistory() {
   writeJson(localStorage, HISTORY_KEY, [])
 }
+
+// Browse lists survive navigating to a manga and back (keyed by source + mode + query + filters)
+export const listCache = new Map()
+
+export function clearListCache(sourceId) {
+  for (const k of listCache.keys()) if (k.startsWith(`${sourceId}|`)) listCache.delete(k)
+}

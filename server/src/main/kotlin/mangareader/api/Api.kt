@@ -3,7 +3,7 @@ package mangareader.api
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -109,6 +109,7 @@ object Api {
                         nsfw = ext?.nsfw ?: false,
                         iconUrl = ext?.iconUrl,
                         supportsLatest = source.supportsLatest,
+                        configurable = source is ConfigurableSource,
                     ),
                 )
             }

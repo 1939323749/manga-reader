@@ -42,6 +42,11 @@ export const api = {
   popular: (id, page) => request('GET', `/api/sources/${id}/popular?page=${page}`),
   latest: (id, page) => request('GET', `/api/sources/${id}/latest?page=${page}`),
   search: (id, q, page) => request('GET', `/api/sources/${id}/search?q=${enc(q)}&page=${page}`),
+  // filters: [{ index, childIndex?, state }] changes against the source's default filter list
+  searchFiltered: (id, q, page, filters) => request('POST', `/api/sources/${id}/search`, { q, page, filters }),
+  filters: (id) => request('GET', `/api/sources/${id}/filters`),
+  preferences: (id) => request('GET', `/api/sources/${id}/preferences`),
+  setPreference: (id, key, value) => request('PUT', `/api/sources/${id}/preferences`, { key, value }),
   manga: (id, manga) => request('POST', `/api/sources/${id}/manga`, manga),
   pages: (id, chapter) => request('POST', `/api/sources/${id}/pages`, chapter),
 

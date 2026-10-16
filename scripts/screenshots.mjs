@@ -25,6 +25,8 @@ const shots = [
   ['sources', '/'],
   ['extensions', '/extensions'],
   ['browse', `/source/${pill.id}`],
+  ['filters', `/source/${pill.id}`],
+  ['settings', `/source/${pill.id}/settings`],
   ['manga', `/source/${pill.id}/manga?${q({ url: manga.url })}`],
   ['reader', `/source/${pill.id}/read?${q({ manga: manga.url, chapter: chapter.url })}`],
   ['recent', '/recent'],
@@ -44,6 +46,10 @@ for (const [device, viewport] of [
     for (const [name, path] of shots) {
       // the manga page relies on the list page having stored the manga object
       await page.goto(base + path, { waitUntil: 'networkidle', timeout: 60000 }).catch((e) => errors.push(`${name}: ${e.message}`))
+      if (name === 'filters') {
+        await page.getByRole('button', { name: /^筛选/ }).click().catch((e) => errors.push(`${name}: ${e.message}`))
+        await page.locator('details.group').first().click().catch(() => {})
+      }
       await page.waitForTimeout(name === 'reader' ? 2500 : 800)
       await page.screenshot({ path: `${out}/${device}-${scheme}-${name}.png`, fullPage: false })
       console.log('shot', device, scheme, name)

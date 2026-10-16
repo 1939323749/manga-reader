@@ -68,6 +68,7 @@ data class SourceDto(
     val nsfw: Boolean,
     val iconUrl: String?,
     val supportsLatest: Boolean? = null,
+    val configurable: Boolean? = null,
 )
 
 @Serializable
