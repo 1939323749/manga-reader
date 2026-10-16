@@ -23,6 +23,7 @@ import mangareader.source.SourceManager
 import okhttp3.Response
 import suwayomi.tachidesk.manga.impl.util.storage.ImageUtil
 import java.io.IOException
+import java.net.InetAddress
 
 object Api {
     private val logger = KotlinLogging.logger {}
@@ -207,8 +208,10 @@ object Api {
 
         /** Connection diagnostics for one URL; only answers requests from this machine */
         get("/api/debug/net") { ctx ->
-            val ip = ctx.ip()
-            val local = ip == "127.0.0.1" || ip == "::1" || ip == "0:0:0:0:0:0:0:1" || ip.startsWith("127.")
+            // Jetty reports IPv6 in brackets, e.g. "[0:0:0:0:0:0:0:1]" for http://localhost
+            val local =
+                runCatching { InetAddress.getByName(ctx.ip().removeSurrounding("[", "]")).isLoopbackAddress }
+                    .getOrDefault(false)
             if (!local) throw NoSuchElementException("Not found")
             val url = ctx.queryParam("url") ?: throw IllegalArgumentException("url is required")
             if (!url.startsWith("http://") && !url.startsWith("https://")) throw IllegalArgumentException("url must be http(s)")
