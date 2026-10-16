@@ -1,0 +1,80 @@
+smoke test against http://127.0.0.1:4567
+  ok   server up (2.1s)
+  ok   repo extension list (0.6s)
+       -> 1425 extensions
+
+== eu.kanade.tachiyomi.extension.all.mangadex
+  ok   install eu.kanade.tachiyomi.extension.all.mangadex (0.4s)
+       -> MangaDex 1.6.0, 61 source(s)
+  ok   source info (0.0s)
+       -> MangaDex (en), latest=True
+  ok   popular page 1 (0.5s)
+       -> 20 manga, hasNextPage=True
+  ok   search 'one' (0.5s)
+       -> 20 results
+  ok   details 'The Case of Reincarnating as a Mob Culti' (0.5s)
+       -> 3 chapters
+  ok   cover (0.6s)
+       -> image/jpeg, 2620344 bytes
+  ok   pages 'Ch.3' (0.6s)
+       -> 32 pages
+  ok   page image (0.5s)
+       -> image/png, 544259 bytes
+
+== eu.kanade.tachiyomi.extension.en.mangapill
+  ok   install eu.kanade.tachiyomi.extension.en.mangapill (0.2s)
+       -> MangaPill 1.6.0, 1 source(s)
+  ok   source info (0.0s)
+       -> MangaPill (en), latest=True
+  ok   popular page 1 (0.7s)
+       -> 10 manga, hasNextPage=False
+  ok   search 'one' (0.6s)
+       -> 50 results
+  ok   details 'Berserk' (0.5s)
+       -> 405 chapters
+  ok   cover (0.2s)
+       -> image/jpeg, 49952 bytes
+  ok   pages 'Group 2 Chapter 386' (0.3s)
+       -> 24 pages
+  ok   page image (0.1s)
+       -> image/jpeg, 260462 bytes
+
+== eu.kanade.tachiyomi.extension.en.mangapill
+  ok   install eu.kanade.tachiyomi.extension.en.mangapill (apk/dex2jar) (0.3s)
+       -> MangaPill 1.6.0, 1 source(s)
+  ok   source info (0.0s)
+       -> MangaPill (en), latest=True
+  FAIL popular page 1: GET /api/sources/8448310129093543312/popular?page=1 -> HTTP 502: {"error":"java.lang.ClassCastException: class java.lang.Object cannot be cast to class okhttp3.Interceptor (java.lang.Object is in module java.base of loader 'bootstrap'; okhttp3.Interceptor is in unnamed module of loader 'app')"}
+  (optional, ignored) GET /api/sources/8448310129093543312/popular?page=1 -> HTTP 502: {"error":"java.lang.ClassCastException: class java.lang.Object cannot be cast to class okhttp3.Interceptor (java.lang.Object is in module java.base of loader 'bootstrap'; okhttp3.Interceptor is in unnamed module of loader 'app')"}
+
+== eu.kanade.tachiyomi.extension.en.weebcentral
+  ok   install eu.kanade.tachiyomi.extension.en.weebcentral (0.2s)
+       -> Weeb Central 1.6.25, 1 source(s)
+  ok   source info (0.0s)
+       -> Weeb Central (en), latest=True
+  ok   popular page 1 (1.8s)
+       -> 32 manga, hasNextPage=True
+  ok   search 'one' (1.0s)
+       -> 32 results
+  ok   details 'One Piece' (3.8s)
+       -> 1196 chapters
+  ok   cover (0.3s)
+       -> image/webp, 89962 bytes
+  ok   pages 'Chapter 1196' (1.6s)
+       -> 17 pages
+  ok   page image (0.1s)
+       -> image/png, 323856 bytes
+
+== network diagnostics
+  ok   debug/net (0.6s)
+       ok  app client (JDK TLS): 200 TLSv1.3 TLS_AES_128_GCM_SHA256 
+       ok  JDK TLS, HTTP/1.1: 200 TLSv1.3 TLS_AES_128_GCM_SHA256 
+       ERR JDK TLS 1.2 only: None  SSLHandshakeException: (protocol_version) Received fatal alert: protocol_version
+       ok  Conscrypt TLS: 200 TLSv1.3 TLS_AES_128_GCM_SHA256 
+       ok  JDK TLS, no proxy: 200 TLSv1.3 TLS_AES_128_GCM_SHA256 
+       ok  Conscrypt TLS, no proxy: 200 TLSv1.3 TLS_AES_128_GCM_SHA256 
+
+== uninstall
+  ok   uninstall weebcentral (0.0s)
+
+ALL GOOD

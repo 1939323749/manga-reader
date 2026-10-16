@@ -1,0 +1,73 @@
+kotlin-logging: initializing... active logger factory: Slf4jLoggerFactory
+15:07:33.847 INFO  mangareader.Main - proxy: no system proxy found, connecting directly (set MANGA_READER_PROXY to use one)
+15:07:34.466 INFO  io.javalin.Javalin - Static file handler added: StaticFileConfig(hostedPath=/, directory=/web, location=CLASSPATH, precompressMaxSize=-1, aliasCheck=null, headers={Cache-Control=max-age=0}, skipFileFunction=null, mimeTypes={}, roles=[]). File system location: '[jar:file:///home/runner/work/manga-reader/manga-reader/server/build/manga-reader-0.1.0.jar!/web/, jar:file:///home/runner/work/manga-reader/manga-reader/server/build/manga-reader-0.1.0.jar!/web/]'
+15:07:34.559 INFO  io.javalin.Javalin - Starting Javalin ...
+15:07:34.599 INFO  io.javalin.Javalin - 
+       __                  ___          _____
+      / /___ __   ______ _/ (_)___     /__  /
+ __  / / __ `/ | / / __ `/ / / __ \      / /
+/ /_/ / /_/ /| |/ / /_/ / / / / / /     / /
+\____/\__,_/ |___/\__,_/_/_/_/ /_/     /_/
+
+       https://javalin.io/documentation
+
+15:07:34.600 INFO  io.javalin.Javalin - Javalin started in 70ms \o/
+15:07:34.602 INFO  io.javalin.Javalin - Listening on http://0.0.0.0:4567/
+15:07:34.613 INFO  io.javalin.Javalin - You are running Javalin 7.2.3 (released August 11, 2026).
+15:07:34.614 INFO  mangareader.Main - manga-reader listening on http://0.0.0.0:4567
+15:07:34.614 INFO  mangareader.Main - data directory: /home/runner/work/_temp/data
+15:07:36.619 INFO  m.e.ExtensionManager - Installed MangaDex 1.6.0 with 61 source(s)
+15:07:40.144 INFO  m.e.ExtensionManager - Installed MangaPill 1.6.0 with 1 source(s)
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by com.squareup.zstd.Zstd__JvmZstdKt in an unnamed module (file:/home/runner/work/manga-reader/manga-reader/server/build/manga-reader-0.1.0.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+15:07:42.886 INFO  m.e.ExtensionManager - Installed MangaPill 1.6.0 with 1 source(s)
+15:07:42.901 WARN  mangareader.api.Api - GET /api/sources/8448310129093543312/popular -> 502
+java.io.IOException: java.lang.ClassCastException: class java.lang.Object cannot be cast to class okhttp3.Interceptor (java.lang.Object is in module java.base of loader 'bootstrap'; okhttp3.Interceptor is in unnamed module of loader 'app')
+	at n.a(Unknown Source)
+	at n.b(Unknown Source)
+	at keiyoushi.source.Generated.f(Unknown Source)
+	at keiyoushi.source.Generated.getPopularManga(Unknown Source)
+	at mangareader.api.Api$defineApi$7$1.invokeSuspend(Api.kt:122)
+	at mangareader.api.Api$defineApi$7$1.invoke(Api.kt)
+	at mangareader.api.Api$defineApi$7$1.invoke(Api.kt)
+	at mangareader.api.Api$runAsync$1$1.invokeSuspend(Api.kt:240)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:798)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Caused by: java.io.IOException: java.lang.ClassCastException: class java.lang.Object cannot be cast to class okhttp3.Interceptor (java.lang.Object is in module java.base of loader 'bootstrap'; okhttp3.Interceptor is in unnamed module of loader 'app')
+	at eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor.intercept(UncaughtExceptionInterceptor.kt:23)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.internal.connection.RealCall.getResponseWithInterceptorChain$okhttp(RealCall.kt:234)
+	at okhttp3.internal.connection.RealCall$AsyncCall.run(RealCall.kt:582)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: java.lang.ClassCastException: class java.lang.Object cannot be cast to class okhttp3.Interceptor (java.lang.Object is in module java.base of loader 'bootstrap'; okhttp3.Interceptor is in unnamed module of loader 'app')
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:328)
+	at okhttp3.logging.HttpLoggingInterceptor.intercept(HttpLoggingInterceptor.kt:249)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.internal.connection.ConnectInterceptor.intercept(ConnectInterceptor.kt:34)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.internal.cache.CacheInterceptor.intercept(CacheInterceptor.kt:98)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.internal.http.BridgeInterceptor.intercept(BridgeInterceptor.kt:83)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.internal.http.RetryAndFollowUpInterceptor.intercept(RetryAndFollowUpInterceptor.kt:72)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at okhttp3.CompressionInterceptor.intercept(CompressionInterceptor.kt:52)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor.intercept(CloudflareInterceptor.kt:49)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor.intercept(UserAgentInterceptor.kt:21)
+	at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:332)
+	at eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor.intercept(UncaughtExceptionInterceptor.kt:18)
+	... 6 common frames omitted
+15:07:43.056 INFO  m.e.ExtensionManager - Installed Weeb Central 1.6.25 with 1 source(s)

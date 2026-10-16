@@ -1,0 +1,157 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Type-safe project accessors is an incubating feature.
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :buildSrc:pluginDescriptors
+> Task :buildSrc:processResources NO-SOURCE
+> Task :buildSrc:compileKotlin
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:classes UP-TO-DATE
+
+> Task :buildSrc:jar
+:jar: No valid plugin descriptors were found in META-INF/gradle-plugins
+
+> Task :server:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :AndroidCompat:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :AndroidCompat:Config:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :server:processResources
+> Task :AndroidCompat:processResources
+> Task :AndroidCompat:Config:processResources NO-SOURCE
+
+> Task :AndroidCompat:Config:compileKotlin
+w: The argument '-Xcontext-parameters' is redundant for the current language version 2.4.
+
+> Task :AndroidCompat:Config:compileJava NO-SOURCE
+> Task :AndroidCompat:Config:classes UP-TO-DATE
+> Task :AndroidCompat:Config:jar
+
+> Task :AndroidCompat:compileKotlin
+w: The argument '-Xcontext-parameters' is redundant for the current language version 2.4.
+w: file:///home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/xyz/nulldev/androidcompat/db/ScrollableResultSet.kt:263:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/xyz/nulldev/androidcompat/db/ScrollableResultSet.kt:271:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/xyz/nulldev/androidcompat/db/ScrollableResultSet.kt:970:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/xyz/nulldev/androidcompat/db/ScrollableResultSet.kt:972:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+
+> Task :AndroidCompat:compileJava
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/database/sqlite/SQLiteDatabase.java:242: warning: [removal] finalize() in Object has been deprecated and marked for removal
+    protected void finalize() throws Throwable {
+                   ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/database/sqlite/SQLiteDatabase.java:246: warning: [removal] finalize() in Object has been deprecated and marked for removal
+            super.finalize();
+                 ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebSettings.java:256: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public static final int FORCE_DARK_OFF = 0;
+                            ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebSettings.java:268: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public static final int FORCE_DARK_AUTO = 1;
+                            ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebSettings.java:277: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public static final int FORCE_DARK_ON = 2;
+                            ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebSettings.java:1590: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public void setForceDark(@ForceDark int forceDark) {
+                ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebSettings.java:1602: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public @ForceDark int getForceDark() {
+                          ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/webkit/WebViewFactoryProvider.java:181: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    ClassLoader getWebViewClassLoader();
+                ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/content/Intent.java:4193: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
+                            ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/content/pm/PackageManager.java:3369: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public abstract int getInstantAppCookieMaxSize();
+                        ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/os/MessageQueue.java:76: warning: [removal] finalize() in Object has been deprecated and marked for removal
+    protected void finalize() throws Throwable {
+                   ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/os/MessageQueue.java:80: warning: [removal] finalize() in Object has been deprecated and marked for removal
+            super.finalize();
+                 ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/database/AbstractCursor.java:385: warning: [removal] finalize() in Object has been deprecated and marked for removal
+    protected void finalize() {
+                   ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/net/NetworkInfo.java:424: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public String getReason() {
+                  ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/net/ConnectivityManager.java:1223: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public static NetworkCapabilities networkCapabilitiesForType(int type) {
+                                      ^
+/home/runner/work/manga-reader/manga-reader/AndroidCompat/src/main/java/android/net/ConnectivityManager.java:1848: warning: [dep-ann] deprecated item is not annotated with @Deprecated
+    public void reportInetCondition(int networkType, int percentage) {
+                ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+16 warnings
+
+> Task :AndroidCompat:classes
+> Task :AndroidCompat:jar
+
+> Task :server:compileKotlin
+w: The argument '-Xcontext-parameters' is redundant for the current language version 2.4.
+w: file:///home/runner/work/manga-reader/manga-reader/server/src/main/kotlin/mangareader/api/Api.kt:286:35 Cast is redundant.
+w: file:///home/runner/work/manga-reader/manga-reader/server/src/main/kotlin/suwayomi/tachidesk/manga/impl/util/AndroidManifestParser.kt:137:9 'constructor(serializersModule: SerializersModule = ..., configure: XmlConfig.CompatBuilder.() -> Unit = ...): XML' is deprecated. Update to the named factory functions.
+w: file:///home/runner/work/manga-reader/manga-reader/server/src/main/kotlin/suwayomi/tachidesk/manga/impl/util/AndroidManifestParser.kt:138:13 'var autoPolymorphic: Boolean?' is deprecated. Directly access the policy, not this property.
+
+> Task :server:compileJava NO-SOURCE
+> Task :server:classes
+
+> Task :server:shadowJar
+Duplicate entries found in the shadowed JAR: 
+META-INF/LICENSE (5 times)
+META-INF/versions/9/OSGI-INF/MANIFEST.MF (5 times)
+META-INF/LICENSE.txt (8 times)
+META-INF/NOTICE.txt (4 times)
+META-INF/LICENSE.md (4 times)
+org/objectweb/asm/AnnotationVisitor.class (2 times)
+org/objectweb/asm/AnnotationWriter.class (2 times)
+org/objectweb/asm/Attribute$Set.class (2 times)
+org/objectweb/asm/Attribute.class (2 times)
+org/objectweb/asm/ByteVector.class (2 times)
+org/objectweb/asm/ClassReader.class (2 times)
+org/objectweb/asm/ClassTooLargeException.class (2 times)
+org/objectweb/asm/ClassVisitor.class (2 times)
+org/objectweb/asm/ClassWriter.class (2 times)
+org/objectweb/asm/ConstantDynamic.class (2 times)
+org/objectweb/asm/Constants.class (2 times)
+org/objectweb/asm/Context.class (2 times)
+org/objectweb/asm/CurrentFrame.class (2 times)
+org/objectweb/asm/Edge.class (2 times)
+org/objectweb/asm/FieldVisitor.class (2 times)
+org/objectweb/asm/FieldWriter.class (2 times)
+org/objectweb/asm/Frame.class (2 times)
+org/objectweb/asm/Handle.class (2 times)
+org/objectweb/asm/Handler.class (2 times)
+org/objectweb/asm/Label.class (2 times)
+org/objectweb/asm/MethodTooLargeException.class (2 times)
+org/objectweb/asm/MethodVisitor.class (2 times)
+org/objectweb/asm/MethodWriter.class (2 times)
+org/objectweb/asm/ModuleVisitor.class (2 times)
+org/objectweb/asm/ModuleWriter.class (2 times)
+org/objectweb/asm/Opcodes.class (2 times)
+org/objectweb/asm/RecordComponentVisitor.class (2 times)
+org/objectweb/asm/RecordComponentWriter.class (2 times)
+org/objectweb/asm/Symbol.class (2 times)
+org/objectweb/asm/SymbolTable$Entry.class (2 times)
+org/objectweb/asm/SymbolTable$LabelEntry.class (2 times)
+org/objectweb/asm/SymbolTable.class (2 times)
+org/objectweb/asm/Type.class (2 times)
+org/objectweb/asm/TypePath.class (2 times)
+org/objectweb/asm/TypeReference.class (2 times)
+org/objectweb/asm/signature/SignatureReader.class (2 times)
+org/objectweb/asm/signature/SignatureVisitor.class (2 times)
+org/objectweb/asm/signature/SignatureWriter.class (2 times)
+META-INF/AL2.0 (2 times)
+META-INF/LGPL2.1 (2 times)
+META-INF/NOTICE.md (6 times)
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792163211145.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/manga-reader/manga-reader/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 46s
+12 actionable tasks: 12 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.8.1/userguide/configuration_cache_enabling.html
